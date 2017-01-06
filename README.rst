@@ -48,7 +48,7 @@ In a view file, import the filt_req decorator as shown below.
 
 Add the following variables to the file.
 
-    :: python
+   .. code-block:: python
 
     eventName = "ip-shield demo" # a name for the event which is being monitored
     blockTime  = 2  # minutes that the IP will be blocked
