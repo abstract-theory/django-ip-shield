@@ -43,7 +43,7 @@ Add "ipshield" to your INSTALLED_APPS setting like this
 
 3. Migrate
 ----------
-Run `python manage.py migrate to create the ipishield models.
+Run "python manage.py migrate" to create the ipishield models.
 
 
 4. Edit A View
