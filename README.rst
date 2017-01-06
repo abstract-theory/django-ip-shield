@@ -48,6 +48,8 @@ In a view file, import the filt_req decorator as shown below.
 
 Add the following variables to the file.
 
+:: python
+
     eventName = "ip-shield demo" # a name for the event which is being monitored
     blockTime  = 2  # minutes that the IP will be blocked
     findTime   = 1  # minutes back in time for which events will be counted
