@@ -88,3 +88,21 @@ The above example would block all requests which had the URL get variable equal 
 .. code-block:: sh
 
     a-given-url/?event=1
+
+While the the following would not.
+
+.. code-block:: sh
+
+    a-given-url/?event=2
+
+
+6. Caveats
+----------
+
+IP Shield makes the below function call.
+
+.. code-block:: python
+
+    request.META.get('REMOTE_ADDR')
+
+Ensure that between Django and upstream servers, that the REMOTE_ADDR header is properly set. Often, the HTTP_X_FORWARDED_FOR header is used in place of REMOTE_ADDR.
