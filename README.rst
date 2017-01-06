@@ -18,14 +18,12 @@ Quick start
 ------------------------
 install package
 
-    .. code-block:: sh
-
+.. code-block:: sh
     pip3 install --user /path/django-ip-shield-0.1.tar.gz
 
 to unistall package run
 
-    .. code-block:: sh
-
+.. code-block:: sh
     pip3 uninstall django-ip-shield
 
 
@@ -33,8 +31,7 @@ to unistall package run
 ---------------------
 Add "ipshield" to your INSTALLED_APPS setting like this
 
-    .. code-block:: python
-
+.. code-block:: python
     INSTALLED_APPS = [
         ...
         'ipshield',
@@ -50,14 +47,12 @@ Run `python manage.py migrate to create the ipishield models.
 --------------
 In a view file, import the filt_req decorator as shown below.
 
-    .. code-block:: python
-
+.. code-block:: python
     from ipshield.views import filt_req
 
 Add the following variables to the file.
 
-    .. code-block:: python
-
+.. code-block:: python
     eventName = "ip-shield demo" # a name for the event which is being monitored
     blockTime  = 2  # minutes that the IP will be blocked
     findTime   = 1  # minutes back in time for which events will be counted
@@ -65,8 +60,7 @@ Add the following variables to the file.
 
 As shown below, add the decorator above the specific view function you wish to protect.
 
-    .. code-block:: python
-
+.. code-block:: python
     @filt_req(eventName, blockTime, findTime, maxAllowed)
     def view(request):
         # function body
@@ -78,12 +72,11 @@ Reload the page five times in one minute. After the fifth page load, the page wi
 -------------------------
 You can also set specific rules which determine what actions leads to the blocking of a view function. The rule is determined by a function returning a boolean value, and it is passed to the decorator. The function should accept a WSGIRequest object (which is typically named "request" in Django's documentation). This object contains the URL variables, the post data, and the HTTP headers. An example is shown below.
 
-    .. code-block:: python
-
+.. code-block:: python
     filtFunc = lambda request: request.GET.get('event') == '1'
     @filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc)
 
-The above example would block all requests which had the URL get variable equal to '1'. For example if a given url where routed to our view function, then the url below would be counted as an event.::
+The above example would block all requests which had the URL get variable equal to '1'. For example if a given url where routed to our view function, then the url below would be counted as an event.
 
-    .. code-block:: sh
+.. code-block:: sh
     a-given-url/?event=1
