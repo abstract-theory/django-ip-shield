@@ -46,6 +46,7 @@ Run `python manage.py migrate to create the ipishield models.
 --------------
 In a view file, import the filt_req decorator as shown below.
 
+    .. code-block:: python
     from ipshield.views import filt_req
 
 Add the following variables to the file.
@@ -76,8 +77,6 @@ You can also set specific rules which determine what actions leads to the blocki
     filtFunc = lambda request: request.GET.get('event') == '1'
     @filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc)
 
-The above example would block all requests which had the URL get variable equal to '1'. For example if a given url where routed to our view function, then the url below would be counted as an event.
-
-    ::
+The above example would block all requests which had the URL get variable equal to '1'. For example if a given url where routed to our view function, then the url below would be counted as an event.::
 
     a-given-url/?event=1
