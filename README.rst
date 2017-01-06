@@ -2,7 +2,7 @@
 IP Shield
 =========
 
-IP Shield is a simple Django app that analyzes HTTP requests and blocks IP addresses from loading specific URLs if suspicious activity is detected. IP Shield is similar to a rate limiter, except that there is a limit per time window. When the limit is exceeded, the IP address is blocked for a given amount of time. IP Shield is similar to the program Fail2Ban, but with two major differences:
+IP Shield is a simple Django app that analyzes HTTP requests and blocks IP addresses from loading specific URLs if suspicious activity is detected. IP Shield is similar to a rate limiter, except that there is a limit per time window. When the limit is exceeded, the IP address is blocked for a given amount of time. IP Shield is similar to the program Fail2Ban, but with two major differences.::
 
     1) Rather than analyzing log files, it analyzes HTTP requests (URLs, post data, and HTTP headers).
     2) Rather than firewalling IP addresses, they are blocked from accessing specific URLs.
@@ -16,11 +16,11 @@ Quick start
 
 1. Install And Uninstall
 ------------------------
-install package
+install package::
 
     pip3 install --user /path/django-ip-shield-0.1.tar.gz
 
-to unistall package run
+to unistall package run::
 
     pip3 uninstall django-ip-shield
 
@@ -47,11 +47,12 @@ Run `python manage.py migrate to create the ipishield models.
 In a view file, import the filt_req decorator as shown below.
 
     .. code-block:: python
+
     from ipshield.views import filt_req
 
 Add the following variables to the file.
 
-   .. code-block:: python
+    .. code-block:: python
 
     eventName = "ip-shield demo" # a name for the event which is being monitored
     blockTime  = 2  # minutes that the IP will be blocked
@@ -60,7 +61,7 @@ Add the following variables to the file.
 
 As shown below, add the decorator above the specific view function you wish to protect.
 
-   .. code-block:: python
+    .. code-block:: python
     @filt_req(eventName, blockTime, findTime, maxAllowed)
     def view(request):
         # function body
