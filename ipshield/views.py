@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.core.handlers.wsgi import WSGIRequest
+from django.http import HttpRequest
 from django.utils import timezone
 import datetime
 from .models import Log, Blocked
@@ -44,14 +44,14 @@ def is_ip_blocked(ipAddress, eventName, blockTime):
 
 
 # logic will not add events once IP has been blocked
-# Note: function without an WSGIRequest object ought to raise an exception
+# Note: function without an HttpRequest object ought to raise an exception
 def filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc = lambda request: True):
     def real_decorator(viewFunc):
         def wrapper(*args):
             # iterate over all arguments to the view function
             for request in args:
-                # first make sure that we have found WSGIRequest object
-                if isinstance (request, WSGIRequest):
+                # first make sure that we have found HttpRequest object
+                if isinstance (request, HttpRequest):
                     # get IP address of remote client
                     remoteAddress = request.META.get('REMOTE_ADDR')
                     if is_ip_blocked(remoteAddress, eventName, blockTime):
