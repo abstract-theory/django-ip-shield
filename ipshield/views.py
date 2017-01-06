@@ -53,7 +53,7 @@ def filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc = lambda reque
                 # first make sure that we have found WSGIRequest object
                 if isinstance (request, WSGIRequest):
                     # get IP address of remote client
-                    remoteAddress = request.META['REMOTE_ADDR']
+                    remoteAddress = request.META.get('REMOTE_ADDR')
                     if is_ip_blocked(remoteAddress, eventName, blockTime):
                         result = view_blocked()
                     else:
