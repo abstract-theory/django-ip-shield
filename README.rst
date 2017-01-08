@@ -2,12 +2,7 @@
 IP Shield
 =========
 
-IP Shield is a simple Django app that analyzes HTTP requests and blocks IP addresses from loading specific URLs if suspicious activity is detected. IP Shield is similar to a rate limiter, except that there is a limit per time window. When the limit is exceeded, the IP address is blocked for a given amount of time. IP Shield is similar to the program Fail2Ban, but with two major differences.::
-
-    1) Rather than analyzing log files, it analyzes HTTP requests (URLs, post data, and HTTP headers).
-    2) Rather than firewalling IP addresses, they are blocked from accessing specific URLs.
-
-Detailed documentation is currently NOT available. The "docs" directory is currently empty.
+IP Shield is a simple Django app that analyzes HTTP requests and directs IP addresses to a lock page if they make suspicious requests. IP Shield is a per-IP-address rate limiter that enforces the limit by having a lock out period. IP Shield also allows user-defined analysis functions, so anything in the HttpRequest object (URL variables, POST data, HTTP headers, etc.) could trigger page locking. The functionality is influenced by the program Fail2Ban.::
 
 
 Quick start
@@ -16,13 +11,19 @@ Quick start
 
 1. Install And Uninstall
 ------------------------
-install package
+build the package:
+
+.. code-block:: sh
+
+    python3 /path/setup.py sdist
+
+install package:
 
 .. code-block:: sh
 
     pip3 install --user /path/django-ip-shield-0.1.tar.gz
 
-to unistall package run
+unistall package:
 
 .. code-block:: sh
 
@@ -31,7 +32,7 @@ to unistall package run
 
 2. Modify settings.py
 ---------------------
-Add "ipshield" to your INSTALLED_APPS setting like this
+Add "ipshield" to your INSTALLED_APPS setting like this:
 
 .. code-block:: python
 
@@ -46,8 +47,8 @@ Add "ipshield" to your INSTALLED_APPS setting like this
 Run "python manage.py migrate" to create the ipishield models.
 
 
-4. Edit A View
---------------
+4. Edit A View File
+-------------------
 In a view file, import the filt_req decorator as shown below.
 
 .. code-block:: python
@@ -58,12 +59,12 @@ Add the following variables to the file.
 
 .. code-block:: python
 
-    eventName = "ip-shield demo" # a name for the event which is being monitored
-    blockTime  = 2  # minutes that the IP will be blocked
-    findTime   = 1  # minutes back in time for which events will be counted
-    maxAllowed = 5  # number of events needed to trigger the view to be locked
+    eventName = "example name" # a name for the event which is being monitored
+    blockTime  = 2  # minutes that an IP will be blocked
+    findTime   = 1  # number of minutes used to calculate the rate
+    maxAllowed = 5  # number of events per findTime that will trigger blocking
 
-As shown below, add the decorator above the specific view function you wish to protect.
+As shown below, add the decorator above the view function that you wish to protect.
 
 .. code-block:: python
 
@@ -71,19 +72,19 @@ As shown below, add the decorator above the specific view function you wish to p
     def view(request):
         # function body
 
-Reload the page five times in one minute. After the fifth page load, the page will be locked for five minutes. Additional page loads will be directed to a page reading "Sorry! This page has been locked." The page will automaticall unlock after two minutes.
+Reload the page six times in one minute. The page should now be locked for five minutes, and you should see a page reading "Sorry! This page has been locked." The page will automatically unlock after two minutes.
 
 
-5. Set A Specialized Rule
+5. Custom Analysis
 -------------------------
-You can also set specific rules which determine what actions leads to the blocking of a view function. The rule is determined by a function returning a boolean value, and it is passed to the decorator. The function should accept a WSGIRequest object (which is typically named "request" in Django's documentation). This object contains the URL variables, the post data, and the HTTP headers. An example is shown below.
+You can also write an analysis function to determine exactly when a view function will be blocked. The function is passed to the decorator. It should accept an HttpRequest object (which is typically named "request" in Django's documentation) as an input, and it should return a boolean value. An example is shown below.
 
 .. code-block:: python
 
     filtFunc = lambda request: request.GET.get('event') == '1'
     @filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc)
 
-The above example would block all requests which had the URL get variable equal to '1'. For example if a given url where routed to our view function, then the url below would be counted as an event.
+The above example would block all requests which had the URL GET variable equal to '1'. For example, if a given url were routed to a view function, then the url below would be counted as an event.
 
 .. code-block:: sh
 
