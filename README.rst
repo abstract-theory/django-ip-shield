@@ -2,7 +2,7 @@
 IP Shield
 =========
 
-IP Shield is a simple Django app that analyzes HTTP requests and directs IP addresses to a lock page if they make suspicious requests. IP Shield is a per-IP-address rate limiter that enforces the limit by having a lock out period. IP Shield also allows user-defined analysis functions, so anything in the HttpRequest object (URL variables, POST data, HTTP headers, etc.) could trigger page locking. The functionality is influenced by the program Fail2Ban.::
+IP Shield is a simple Django app that analyzes HTTP requests and directs IP addresses to a lock page if they make suspicious requests. IP Shield is a per-IP-address rate limiter that enforces the limit by having a lock out period. IP Shield also allows user-defined analysis functions, so anything in the HttpRequest object (URL variables, POST data, HTTP headers, etc.) could trigger page locking. The functionality is influenced by the program Fail2Ban.
 
 
 Quick start
