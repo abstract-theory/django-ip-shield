@@ -2,7 +2,7 @@
 IP Shield
 =========
 
-IP Shield is a simple Django app that analyzes HTTP requests and directs IP addresses to a lock page if they make suspicious requests. IP Shield is a per-IP-address rate limiter that enforces the limit by having a lock out period. IP Shield also allows user-defined analysis functions, so anything in the HttpRequest object (URL variables, POST data, HTTP headers, etc.) could trigger page locking. The functionality is influenced by the program Fail2Ban.
+IP Shield is a Django app that analyzes HTTP requests and returns lock pages to IP addresses that perform suspicious actions. IP Shield is a per-IP-address rate limiter that enforces the limit with a lock out period. IP Shield also allows you to write your own analysis functions, so anything in the HttpRequest object (URL variables, POST data, HTTP headers, etc.) could trigger page locking. The functionality is influenced by the program Fail2Ban.
 
 
 Quick start
@@ -17,13 +17,13 @@ build the package:
 
     python3 /path/setup.py sdist
 
-install package:
+install the package:
 
 .. code-block:: sh
 
     pip3 install --user /path/django-ip-shield-0.1.tar.gz
 
-unistall package:
+unistall the package:
 
 .. code-block:: sh
 
@@ -32,7 +32,7 @@ unistall package:
 
 2. Modify settings.py
 ---------------------
-Add "ipshield" to your INSTALLED_APPS setting like this:
+Add "ipshield" to your INSTALLED_APPS setting:
 
 .. code-block:: python
 
@@ -44,7 +44,12 @@ Add "ipshield" to your INSTALLED_APPS setting like this:
 
 3. Migrate
 ----------
-Run "python manage.py migrate" to create the ipishield models.
+
+Apply migrations for IP Shield by running:
+
+.. code-block:: sh
+
+    python3 manage.py migrate
 
 
 4. Edit A View File
@@ -77,14 +82,14 @@ Reload the page six times in one minute. The page should now be locked for five 
 
 5. Custom Analysis
 -------------------------
-You can also write an analysis function to determine exactly when a view function will be blocked. The function is passed to the decorator. It should accept an HttpRequest object (which is typically named "request" in Django's documentation) as an input, and it should return a boolean value. An example is shown below.
+You can also write an analysis function to determine exactly what IP Sheild will consider to be suspicious. This analysis function will be passed to the decorator. It should accept an HttpRequest object (which is typically named "request" in Django's documentation) as an input, and it should return a boolean value. An example is shown below.
 
 .. code-block:: python
 
     filtFunc = lambda request: request.GET.get('event') == '1'
     @filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc)
 
-The above example would block all requests which had the URL GET variable equal to '1'. For example, if a given url were routed to a view function, then the url below would be counted as an event.
+The above example would block all requests which had the URL GET variable equal to '1'. For example, the url below would be counted as an event.
 
 .. code-block:: sh
 
@@ -106,4 +111,4 @@ IP Shield makes the below function call.
 
     request.META.get('REMOTE_ADDR')
 
-Ensure that between Django and upstream servers, that the REMOTE_ADDR header is properly set. Often, the HTTP_X_FORWARDED_FOR header is used in place of REMOTE_ADDR.
+Between Django and any upstream servers, ensure that the REMOTE_ADDR header is properly set. Often, the HTTP_X_FORWARDED_FOR header is used in place of REMOTE_ADDR.
