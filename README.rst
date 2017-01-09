@@ -89,7 +89,7 @@ You can also write an analysis function to determine exactly what IP Sheild will
     filtFunc = lambda request: request.GET.get('event') == '1'
     @filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc)
 
-The above example would block all requests which had the URL GET variable equal to '1'. For example, the url below would be counted as an event.
+The above example would block all requests which had the URL GET variable named 'event' that held a value of '1'. For example, the url below would be counted as an event.
 
 .. code-block:: sh
 
