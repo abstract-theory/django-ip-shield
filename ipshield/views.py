@@ -15,13 +15,13 @@ def add_event(ipAddress, eventName, findTime, maxAllowed):
     Log.objects.filter(EventName=eventName, EventDate__lt=dateLim).delete()
 
     # add new entry
-    obj = Log(IpAddress=ipAddress, EventName=eventName)
+    obj = Log(EventName=eventName, IpAddress=ipAddress)
     obj.save()
 
     # block IP if counted number equals limit
     num = Log.objects.filter(IpAddress=ipAddress, EventName=eventName).count()
     if num >= maxAllowed:
-        obj = Blocked.objects.get_or_create(IpAddress=ipAddress, EventName=eventName)[0]
+        obj = Blocked.objects.get_or_create(EventName=eventName, IpAddress=ipAddress)[0]
         obj.BlockDate = now
         obj.save()
 
@@ -30,10 +30,10 @@ def is_ip_blocked(ipAddress, eventName, blockTime):
     # remove blocked IPs older than blockTime
     now = timezone.now()
     dateLim = now - datetime.timedelta(minutes=blockTime)
-    Blocked.objects.filter(IpAddress=ipAddress, BlockDate__lt=dateLim, EventName=eventName).delete()
+    Blocked.objects.filter(EventName=eventName, BlockDate__lt=dateLim).delete()
 
     # check if any entries are still left
-    isBlocked = Blocked.objects.filter(IpAddress=ipAddress, EventName=eventName).exists()
+    isBlocked = Blocked.objects.filter(EventName=eventName, IpAddress=ipAddress).exists()
 
     return isBlocked
 
