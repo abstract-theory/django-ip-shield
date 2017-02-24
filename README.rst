@@ -82,12 +82,12 @@ Reload the page six times in one minute. The page should now be locked for five 
 
 5. Custom Analysis
 -------------------------
-You can also write an analysis function to determine exactly what IP Sheild will consider to be suspicious. This analysis function will be passed to the decorator. It should accept an HttpRequest object (which is typically named "request" in Django's documentation) as an input, and it should return a boolean value. An example is shown below.
+You can also write an analysis function to determine exactly what IP Sheild will consider to be suspicious. You may analyze URL variables, POST data, IP address, etc. This analysis function will be passed to the decorator. It should accept an HttpRequest object (which is typically named "request" in Django's documentation) as an input, and it should return a boolean value. An example is shown below.
 
 .. code-block:: python
 
-    filtFunc = lambda request: request.GET.get('event') == '1'
-    @filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc)
+    myFiltFunc = lambda request: request.GET.get('event') == '1'
+    @filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc = myFiltFunc)
 
 The above example would block all requests which had the URL GET variable named 'event' that held a value of '1'. For example, the url below would be counted as an event.
 
@@ -102,7 +102,21 @@ In contrast, the following would not be counted as an event.
     a-given-url/?event=2
 
 
-6. Caveats
+6. Custom View Functions
+-------------------------
+You may also use custom view function. This is useful if you want to return some of the request data to the client, or if you simply wish to use a particular HTML template when a particular event occurs. To do this, you need to write a view function and pass it to the decorator. An example is shown below.
+
+.. code-block:: python
+
+    def view_blocked(request):
+        msg = "We're Sorry! You did something that makes us uncomfortable."
+        html = "".join(("<html><body><h1><center>", msg, "</center></h1></body></html>"))
+        return HttpResponse(html)
+
+    @filt_req(eventName, blockTime, findTime, maxAllowed, blockedViewFunc = view_blocked)
+
+
+7. Caveats
 ----------
 
 IP Shield makes the below function call.
