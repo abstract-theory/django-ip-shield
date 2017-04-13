@@ -41,7 +41,7 @@ def is_ip_blocked(ipAddress, eventName, blockTime):
 # generic view function for lock page
 def lock_page(request):
     msg = "Sorry! Your request has been blocked."
-    html = "".join(("<html><body><h1><center>", msg, "</center></h1></body></html>"))
+    html = "".join(("<html><body><h1><center>", msg, "<br><a href=\"/\">home</a></center></h1></body></html>"))
     return HttpResponse(html, status=429)
 
 
