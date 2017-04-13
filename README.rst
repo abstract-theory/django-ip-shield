@@ -103,7 +103,9 @@ In contrast, the following would NOT be counted as an event.
 
 
 As another example, say that we want to monitor POST requests, but not GET requests. This could be implemented with the analysis function below.
+
 .. code-block:: python
+
     myFiltFunc = lambda request: request.method == 'POST'
 
 
