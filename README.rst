@@ -82,7 +82,7 @@ Reload the page six times in one minute. The page should now be locked for five 
 
 5. Custom Analysis
 -------------------------
-You can also write an analysis function to determine exactly what IP Sheild will consider to be suspicious. You may analyze URL variables, POST data, IP address, etc. This analysis function will be passed to the decorator. It should accept an HttpRequest object (which is typically named "request" in Django's documentation) as an input, and it should return a boolean value. An example is shown below.
+You may analyze URL variables, POST data, IP address, etc. To do this, you must write a custom analysis function which will determine exactly what IP Sheild will consider to be suspicious. This function will be passed to the decorator. It should accept an HttpRequest object (which is typically named "request" in Django's documentation) as an input, and it should return a boolean value. An example is shown below.
 
 .. code-block:: python
 
@@ -95,7 +95,7 @@ The above example would block all requests which had the URL GET variable named 
 
     a-given-url/?event=1
 
-In contrast, the following would not be counted as an event.
+In contrast, the following would NOT be counted as an event.
 
 .. code-block:: sh
 
@@ -111,7 +111,7 @@ You may also use custom view function. This is useful if you want to return some
     def view_blocked(request):
         msg = "We're Sorry! You did something that makes us uncomfortable."
         html = "".join(("<html><body><h1><center>", msg, "</center></h1></body></html>"))
-        return HttpResponse(html)
+        return HttpResponse(html, status=429)
 
     @filt_req(eventName, blockTime, findTime, maxAllowed, blockedViewFunc = view_blocked)
 
