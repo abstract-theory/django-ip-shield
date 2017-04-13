@@ -102,6 +102,11 @@ In contrast, the following would NOT be counted as an event.
     a-given-url/?event=2
 
 
+As another example, say that we want to monitor POST requests, but not GET requests. This could be implemented with the analysis function below.
+.. code-block:: python
+    myFiltFunc = lambda request: request.method == 'POST'
+
+
 6. Custom View Functions
 -------------------------
 You may also use custom view function. This is useful if you want to return some of the request data to the client, or if you simply wish to use a particular HTML template when a particular event occurs. To do this, you need to write a view function and pass it to the decorator. An example is shown below.
