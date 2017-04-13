@@ -113,7 +113,7 @@ You may also use custom view function. This is useful if you want to return some
         html = "".join(("<html><body><h1><center>", msg, "</center></h1></body></html>"))
         return HttpResponse(html, status=429)
 
-    @filt_req(eventName, blockTime, findTime, maxAllowed, blockedViewFunc = view_blocked)
+    @filt_req(eventName, blockTime, findTime, maxAllowed, lockPageViewFunc = view_blocked)
 
 
 7. Caveats
