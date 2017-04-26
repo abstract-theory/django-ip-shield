@@ -21,7 +21,7 @@ install the package:
 
 .. code-block:: sh
 
-    pip3 install --user /path/django-ip-shield-0.1.tar.gz
+    pip3 install --user /path/django-ip-shield-0.1.5.tar.gz
 
 unistall the package:
 
@@ -133,3 +133,4 @@ IP Shield makes the below function call.
     request.META.get('REMOTE_ADDR')
 
 Between Django and any upstream servers, ensure that the REMOTE_ADDR header is properly set. Often, the HTTP_X_FORWARDED_FOR header is used in place of REMOTE_ADDR.
+
