@@ -23,7 +23,7 @@ install the package:
 
 .. code-block:: sh
 
-    pip3 install --user /path/django-ip-shield-0.1.5.tar.gz
+    pip3 install --user /path/django-ip-shield-0.1.6.tar.gz
 
 unistall the package:
 
