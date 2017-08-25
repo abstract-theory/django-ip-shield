@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from django.http import HttpRequest
+from django.core.handlers.wsgi import WSGIRequest
 from django.utils import timezone
 import datetime
 from .models import Log, Blocked
@@ -52,9 +52,19 @@ def filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc = lambda reque
         def wrapper(*args):
             # iterate to make sure that we have found the HttpRequest object
             for request in args:
-                if isinstance (request, HttpRequest):
+                if isinstance (request, WSGIRequest):
                     # get IP address of remote client
+
+                    # NOTE: You might need to hack this part of the code to get the proper
+                    # client IP address. The HTTP headers HTTP_X_FORWARDED_FOR and REMOTE_ADDR
+                    # vary from system to system.
+
                     remoteAddress = request.META.get('REMOTE_ADDR')
+
+                    #remoteAddress = request.META.get('HTTP_X_FORWARDED_FOR')
+                    #if not remoteAddress:
+                        #remoteAddress = request.META.get('REMOTE_ADDR')
+
                     if is_ip_blocked(remoteAddress, eventName, blockTime):
                         result = lockPageViewFunc(request)
                     else:
