@@ -11,6 +11,8 @@ Quick start
 
 1. Install And Uninstall
 ------------------------
+It is probably easiest to just drop the source folder into your Django project as you would any other Django app. For completeness, the package installation instructions are written below.
+
 build the package:
 
 .. code-block:: sh
