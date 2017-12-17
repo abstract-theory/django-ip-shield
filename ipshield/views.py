@@ -38,7 +38,7 @@ def is_ip_blocked(ipAddress, eventName, blockTime):
     return isBlocked
 
 
-# generic view function for lock page
+# this returns the default lock page
 def lock_page(request):
     msg = "Sorry! Your request has been blocked."
     html = "".join(("<html><body><h1><center>", msg, "<br><a href=\"/\">home</a></center></h1></body></html>"))
@@ -46,11 +46,10 @@ def lock_page(request):
 
 
 # logic will not add events once IP has been blocked
-# Note: function without an HttpRequest object ought to raise an exception
 def filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc = lambda request: True, lockPageViewFunc = lock_page):
     def real_decorator(viewFunc):
         def wrapper(*args):
-            # iterate to make sure that we have found the HttpRequest object
+            # iterate to make sure that we have found the WSGIRequest object
             for request in args:
                 if isinstance (request, WSGIRequest):
                     # get IP address of remote client
