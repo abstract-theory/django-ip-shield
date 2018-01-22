@@ -11,7 +11,7 @@ Quick start
 
 1. Install And Uninstall
 ------------------------
-It is probably easiest to just drop the source folder into your Django project as you would any other Django app. For completeness, the package installation instructions are written below.
+It is probably easiest to just drop the source folder into your Django project as you would any other Django app. That way, it can be modified to suit your needs. For completeness, the package installation instructions are written below.
 
 build the package:
 
@@ -34,13 +34,22 @@ unistall the package:
 
 2. Modify settings.py
 ---------------------
-Add "ipshield" to your INSTALLED_APPS setting:
+Add "ipshield" to your INSTALLED_APPS setting. If installed with pip, use:
 
 .. code-block:: python
 
     INSTALLED_APPS = [
         ...
         'ipshield',
+    ]
+
+If it is just dropped into your project use this:
+
+.. code-block:: python
+
+    INSTALLED_APPS = [
+        ...
+        'ipshield.apps.IpShieldConfig',
     ]
 
 
