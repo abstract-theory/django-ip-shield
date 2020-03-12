@@ -1,7 +1,6 @@
 from django.http import HttpResponse
-from django.core.handlers.wsgi import WSGIRequest
 from django.utils import timezone
-import datetime
+from datetime import timedelta
 from .models import Log, Blocked
 
 
@@ -11,7 +10,7 @@ def add_event(ipAddress, eventName, findTime, maxAllowed):
     now = timezone.now()
 
     # remove events older than findTime
-    dateLim = now - datetime.timedelta(minutes=findTime)
+    dateLim = now - timedelta(minutes=findTime)
     Log.objects.filter(EventName=eventName, EventDate__lt=dateLim).delete()
 
     # add new entry
@@ -29,7 +28,7 @@ def add_event(ipAddress, eventName, findTime, maxAllowed):
 def is_ip_blocked(ipAddress, eventName, blockTime):
     # remove blocked IPs older than blockTime
     now = timezone.now()
-    dateLim = now - datetime.timedelta(minutes=blockTime)
+    dateLim = now - timedelta(minutes=blockTime)
     Blocked.objects.filter(EventName=eventName, BlockDate__lt=dateLim).delete()
 
     # check if any entries are still left
@@ -40,40 +39,51 @@ def is_ip_blocked(ipAddress, eventName, blockTime):
 
 # this returns the default lock page
 def lock_page(request):
-    msg = "Sorry! Your request has been blocked."
-    html = "".join(("<html><body><h1><center>", msg, "<br><a href=\"/\">home</a></center></h1></body></html>"))
+
+    html = (
+        '<html>'
+        '   <head><meta name="viewport" content="width=device-width, initial-scale=1" /></head>'
+        '   <body style="display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 18px;">'
+        '      <div>Sorry! Your request has been blocked.</div>'
+        '       <a href="/">home</a>'
+        '   </body>'
+        '</html>'
+    )
+
     return HttpResponse(html, status=429)
 
 
+
 # logic will not add events once IP has been blocked
-def filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc = lambda request: True, lockPageViewFunc = lock_page):
+def filt_req(eventName, blockTime, findTime, maxAllowed, isEvent = lambda request: True, lockPageViewFunc = lock_page):
     def real_decorator(viewFunc):
-        def wrapper(*args):
-            # iterate to make sure that we have found the WSGIRequest object
-            for request in args:
-                if isinstance (request, WSGIRequest):
-                    # get IP address of remote client
+        def wrapper(request, *args, **kwargs):
+            # get IP address of remote client
 
-                    # NOTE: You might need to hack this part of the code to get the proper
-                    # client IP address. The HTTP headers HTTP_X_FORWARDED_FOR and REMOTE_ADDR
-                    # vary from system to system.
+            # -----------------------------------------------------------------------------------------
+            # NOTE: You might need to hack this part of the code to get the proper
+            # client IP address. The HTTP headers HTTP_X_FORWARDED_FOR and REMOTE_ADDR
+            # vary from system to system. See
+            #
+            #     https://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
+            #
+            # for a discussion of this issue.
+            # -----------------------------------------------------------------------------------------
 
-                    remoteAddress = request.META.get('REMOTE_ADDR')
+            remoteAddress = request.META.get('REMOTE_ADDR')
 
-                    #remoteAddress = request.META.get('HTTP_X_FORWARDED_FOR')
-                    #if not remoteAddress:
-                        #remoteAddress = request.META.get('REMOTE_ADDR')
+            #remoteAddress = request.META.get('HTTP_X_FORWARDED_FOR')
+            #if not remoteAddress:
+                #remoteAddress = request.META.get('REMOTE_ADDR')
 
-                    if is_ip_blocked(remoteAddress, eventName, blockTime):
-                        result = lockPageViewFunc(request)
-                    else:
-                        if filtFunc(request):
-                            add_event(remoteAddress, eventName, findTime, maxAllowed)
-                        result = viewFunc(*args)
-                    return result
+            if is_ip_blocked(remoteAddress, eventName, blockTime):
+                result = lockPageViewFunc(request)
+            else:
+                if isEvent(request):
+                    add_event(remoteAddress, eventName, findTime, maxAllowed)
+                result = viewFunc(request, *args, **kwargs)
+            return result
 
         return wrapper
     return real_decorator
-
-
 
