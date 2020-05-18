@@ -56,11 +56,11 @@ Apply migrations for IP Shield by running:
 
 4. Edit A View File
 -------------------
-In a view file, import the filt_req decorator as shown below.
+In a view file, import the limit_ips decorator as shown below.
 
 .. code-block:: python
 
-    from ipshield.views import filt_req
+    from ipshield.views import limit_ips
 
 Add the following variables to the file.
 
@@ -75,7 +75,7 @@ As shown below, add the decorator above the view function that you wish to prote
 
 .. code-block:: python
 
-    @filt_req(eventName, blockTime, findTime, maxAllowed)
+    @limit_ips(eventName, blockTime, findTime, maxAllowed)
     def view(request):
         # function body
 
@@ -88,8 +88,8 @@ You may analyze URL variables, POST data, IP address, etc. To do this, you must 
 
 .. code-block:: python
 
-    myFiltFunc = lambda request: request.GET.get('event') == '1'
-    @filt_req(eventName, blockTime, findTime, maxAllowed, filtFunc = myFiltFunc)
+    myEvent = lambda request: request.GET.get('event') == '1'
+    @limit_ips(eventName, blockTime, findTime, maxAllowed, isEvent = myEvent)
 
 The above example would block all requests which had the URL GET variable named 'event' that held a value of '1'. For example, the url below would be counted as an event.
 
@@ -108,7 +108,7 @@ As another example, say that we want to monitor POST requests, but not GET reque
 
 .. code-block:: python
 
-    myFiltFunc = lambda request: request.method == 'POST'
+    myEvent = lambda request: request.method == 'POST'
 
 
 6. Custom View Functions
@@ -117,15 +117,28 @@ You may also use custom view function. This is useful if you want to return some
 
 .. code-block:: python
 
-    def view_blocked(request):
+    def view_blocked():
         msg = "We're Sorry! You did something that makes us uncomfortable."
         html = "".join(("<html><body><h1><center>", msg, "</center></h1></body></html>"))
         return HttpResponse(html, status=429)
 
-    @filt_req(eventName, blockTime, findTime, maxAllowed, lockPageViewFunc = view_blocked)
+    @limit_ips(eventName, blockTime, findTime, maxAllowed, locked_view = view_blocked())
 
 
-7. Caveats
+7. LimitIps_as_view instead of TemplateView.as_view
+----------------------------------------------------------
+The function LimitIps_as_view can be used in place of TemplateView.as_view. Using "LimitIps_as_view" works the same way as the decorator "limit_ips". Usage of the function is illustrated below.
+
+.. code-block:: python
+
+    from ipshield.views import LimitIps_as_view
+
+    urlpatterns = [
+        re_path(r'^hello-template/$', LimitIps_as_view(template_name='hello-friendly-bots.html')),
+    ]
+
+
+8. Caveats
 ----------
 
 IP Shield makes the below function call.
