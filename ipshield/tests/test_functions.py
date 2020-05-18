@@ -1,9 +1,9 @@
 
 from django.http import HttpResponse
-from django.test import TestCase, RequestFactory, Client
+from django.test import TestCase, RequestFactory
 
-from .models import Log, Blocked
-from .views import add_event, is_ip_blocked, filt_req
+from ..models import Log, Blocked
+from ..views import add_event, is_ip_blocked, limit_ips
 
 from datetime import timedelta
 from django.utils import timezone
@@ -11,8 +11,8 @@ from django.utils import timezone
 
 ipAddress = "192.1.1.1"
 rf = RequestFactory()
-req = rf.get('/fake/url', REMOTE_ADDR=ipAddress)
-req_env = rf.post('/fake/url', REMOTE_ADDR=ipAddress)
+req_get = rf.get('/fake/url', REMOTE_ADDR=ipAddress)
+req_post = rf.post('/fake/url', REMOTE_ADDR=ipAddress)
 
 
 eventName = "test_event"
@@ -27,14 +27,14 @@ def isEvent(request):
 
 
 # fake view function that restricts only POST requests
-@filt_req(eventName, blockTime, findTime, maxAllowed, isEvent)
-def fake_view_func_env(request):
+@limit_ips(eventName, blockTime, findTime, maxAllowed, isEvent)
+def view_custom_event(request):
     return HttpResponse(status=200)
 
 
 # fake view function that restricts any type of request
-@filt_req(eventName, blockTime, findTime, maxAllowed)
-def fake_view_func(request):
+@limit_ips(eventName, blockTime, findTime, maxAllowed)
+def view_generic(request):
     return HttpResponse(status=200)
 
 
@@ -53,16 +53,15 @@ class IpShieldTests(TestCase):
         self.assertEqual(maxAllowed, n)
 
 
-
     def test_findTime(self):
 
         # add max allowed number of events younger than findTime
         for n in range(maxAllowed):
-            res = fake_view_func(req)
+            res = view_generic(req_get)
             # requests are not blocked
             self.assertEqual(res.status_code, 200)
 
-        res = fake_view_func(req)
+        res = view_generic(req_get)
         # now request should be blocked
         self.assertEqual(res.status_code, 429)
 
@@ -73,11 +72,9 @@ class IpShieldTests(TestCase):
         olderDate = timezone.now() - timedelta(minutes=findTime)
         Log.objects.filter(EventName=eventName, IpAddress=ipAddress).update(EventDate=olderDate)
         # new request should not be blocked now
-        res = fake_view_func(req)
+        res = view_generic(req_get)
         # the old log entries should now be cleared, and one new entry added
         self.assertEqual(Log.objects.filter(EventName=eventName, IpAddress=ipAddress).count(), 1)
-
-
 
 
     def test_blockTime(self):
@@ -86,13 +83,13 @@ class IpShieldTests(TestCase):
         date = timezone.now()
         obj = Blocked(EventName=eventName, IpAddress=ipAddress, BlockDate=date)
         obj.save()
-        res = fake_view_func(req)
+        res = view_generic(req_get)
         self.assertEqual(res.status_code, 429)
 
         # change date of Blocked entry to be older than blockTime
         olderDate = timezone.now() - timedelta(minutes=blockTime)
         Blocked.objects.filter(EventName=eventName, IpAddress=ipAddress).update(BlockDate=olderDate)
-        res = fake_view_func(req)
+        res = view_generic(req_get)
         self.assertEqual(res.status_code, 200)
 
 
@@ -101,15 +98,16 @@ class IpShieldTests(TestCase):
 
         # these are all non-events and should not trigger blocking
         for n in range(maxAllowed+1):
-            res = fake_view_func_env(req)
+            res = view_custom_event(req_get)
             self.assertEqual(res.status_code, 200)
 
         # run the max allowed number of events
         for n in range(maxAllowed):
-            res = fake_view_func_env(req_env)
+            res = view_custom_event(req_post)
             # requests are not blocked yet
             self.assertEqual(res.status_code, 200)
 
-        res = fake_view_func_env(req_env)
+        res = view_custom_event(req_post)
         # now the event should be blocked
         self.assertEqual(res.status_code, 429)
+
