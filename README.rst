@@ -138,7 +138,16 @@ The function LimitIps_as_view can be used in place of TemplateView.as_view. Usin
     ]
 
 
-8. Caveats
+8. Management Commands
+-------------------------------
+There are several management commands. It allows you to list logged events and blocked IPs, remove aspecific IPs and events, manually add an IP to the block list, and flush all logged events and blocked IPs the the database. Typing the following will print help documentation.
+
+.. code-block:: sh
+
+    django-admin ipshield --help
+
+
+9. Caveats
 ----------
 
 IP Shield makes the below function call.
