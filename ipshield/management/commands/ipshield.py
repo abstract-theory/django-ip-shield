@@ -1,5 +1,8 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
+from django.utils import timezone
+
 from ipshield.models import Log, Blocked
+
 
 class Command(BaseCommand):
     """
@@ -23,6 +26,26 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
 
+        # subparsers = parser.add_subparsers()
+
+        # add_p = subparsers.add_parser('add')
+        # add_p.add_argument("name")
+        # add_p.add_argument("--web_port")
+        # ...
+
+        # rm = subparsers.add_parser('rm')
+        # rm.add_argument("-ip", type=str)
+        # rm.add_argument("-event", type=str)
+
+        # rm.add_argument("all", action='store_true')
+        # add = subparsers.add_parser('-add')
+
+        # ls = subparsers.add_parser('-list')
+        # ls.add_argument("log", nargs='+')
+        # ls.add_argument("block", nargs='+')
+
+
+
         parser.add_argument(
             '--list',
             action='store_true',
@@ -39,6 +62,13 @@ class Command(BaseCommand):
             '--log',
             action='store_true',
             help='List of all logged events.',
+        )
+
+        parser.add_argument(
+            '--addip',
+            nargs=2,
+            action='append',
+            help='Adds IP with event to block list.',
         )
 
         parser.add_argument(
@@ -62,11 +92,15 @@ class Command(BaseCommand):
         )
 
 
+
     def success(self, msg):
         self.stdout.write(self.style.SUCCESS(msg))
 
 
     def handle(self, *args, **options):
+
+        # print(args)
+        # print(options)
 
         if options['list']:
             l = Log.objects.all()
@@ -85,6 +119,16 @@ class Command(BaseCommand):
             l = Log.objects.all()
             for L in l.values():
                 print('    "%s", "%s", "%s"' % (L.get('IpAddress'), L.get('EventName'), L.get('EventDate')))
+
+        elif options['addip']:
+            for ip_event in options['addip']:
+                ipAddress = ip_event[0]
+                eventName = ip_event[1]
+                now = timezone.now()
+                obj = Blocked.objects.get_or_create(EventName=eventName, IpAddress=ipAddress)[0]
+                obj.BlockDate = now
+                obj.save()
+
 
         elif options['rmip']:
             for addresses in options['rmip']:
