@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.views.generic import TemplateView
 from django.utils import timezone
 from datetime import timedelta
 from .models import Log, Blocked
@@ -38,7 +39,7 @@ def is_ip_blocked(ipAddress, eventName, blockTime):
 
 
 # this returns the default lock page
-def lock_page(request):
+def lock_page():
 
     html = (
         '<html>'
@@ -53,37 +54,45 @@ def lock_page(request):
     return HttpResponse(html, status=429)
 
 
-
 # logic will not add events once IP has been blocked
-def filt_req(eventName, blockTime, findTime, maxAllowed, isEvent = lambda request: True, lockPageViewFunc = lock_page):
+def limit_ips(eventName, blockTime, findTime, maxAllowed, isEvent = lambda request: True, locked_view = lock_page()):
     def real_decorator(viewFunc):
         def wrapper(request, *args, **kwargs):
             # get IP address of remote client
 
             # -----------------------------------------------------------------------------------------
-            # NOTE: You might need to hack this part of the code to get the proper
+            # WARNING: You might need to hack this part of the code to get the proper
             # client IP address. The HTTP headers HTTP_X_FORWARDED_FOR and REMOTE_ADDR
             # vary from system to system. See
             #
             #     https://stackoverflow.com/questions/4581789/how-do-i-get-user-ip-address-in-django
             #
-            # for a discussion of this issue.
+            # for a discussion of this issue. Sometimes problems can be solved by replacing
+            # 'REMOTE_ADDR' with 'HTTP_X_FORWARDED_FOR'.
             # -----------------------------------------------------------------------------------------
 
             remoteAddress = request.META.get('REMOTE_ADDR')
 
-            #remoteAddress = request.META.get('HTTP_X_FORWARDED_FOR')
-            #if not remoteAddress:
-                #remoteAddress = request.META.get('REMOTE_ADDR')
-
-            if is_ip_blocked(remoteAddress, eventName, blockTime):
-                result = lockPageViewFunc(request)
-            else:
-                if isEvent(request):
+            isLocked = False
+            if isEvent(request):
+                if maxAllowed == 0 or is_ip_blocked(remoteAddress, eventName, blockTime):
+                    isLocked = True
+                else:
                     add_event(remoteAddress, eventName, findTime, maxAllowed)
+
+            if isLocked:
+                result = locked_view
+            else:
                 result = viewFunc(request, *args, **kwargs)
+
             return result
 
         return wrapper
     return real_decorator
+
+
+def LimitIps_as_view(eventName, blockTime, findTime, maxAllowed, isEvent = lambda request: True, locked_view = lock_page(), **initkwargs):
+    """A function that limits the number of page requests by IP address.
+    It is to be used in place of function TemplateView.as_view."""
+    return limit_ips(eventName, blockTime, findTime, maxAllowed, isEvent, locked_view)(TemplateView.as_view(**initkwargs))
 
