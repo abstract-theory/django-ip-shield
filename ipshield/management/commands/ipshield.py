@@ -10,40 +10,21 @@ class Command(BaseCommand):
     ======
         Listing blocks and logs
         -----------------------
-        django-admin unblock --list
-        django-admin unblock --log
-        django-admin unblock --block
+        django-admin ipshield --list
+        django-admin ipshield --log
+        django-admin ipshield --block
 
         Removing blocks and logs
         ------------------------
-        django-admin unblock --rmip <IP_Address>
-        django-admin unblock --rmevent <Event_Name>
-        django-admin unblock --rmall
+        django-admin ipshield --rmip <IP_Address>
+        django-admin ipshield --rmevent <Event_Name>
+        django-admin ipshield --rmall
     """
 
     help = 'Django management commands for django-ip-shield.'
 
 
     def add_arguments(self, parser):
-
-        # subparsers = parser.add_subparsers()
-
-        # add_p = subparsers.add_parser('add')
-        # add_p.add_argument("name")
-        # add_p.add_argument("--web_port")
-        # ...
-
-        # rm = subparsers.add_parser('rm')
-        # rm.add_argument("-ip", type=str)
-        # rm.add_argument("-event", type=str)
-
-        # rm.add_argument("all", action='store_true')
-        # add = subparsers.add_parser('-add')
-
-        # ls = subparsers.add_parser('-list')
-        # ls.add_argument("log", nargs='+')
-        # ls.add_argument("block", nargs='+')
-
 
 
         parser.add_argument(
@@ -98,9 +79,6 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
-
-        # print(args)
-        # print(options)
 
         if options['list']:
             l = Log.objects.all()
